@@ -2,12 +2,19 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 
+const schedule = {
+  title: "CS Courses for 2018-2019"
+  };
+
 const App = () => {
   const [count, setCount] = useState(0)
+
+  
 
   return (
     <div className="text-center">
       <header className="bg-[#282c34] min-h-screen flex flex-col items-center justify-center text-[calc(10px_+_2vmin)] text-white">
+        <h1>{schedule.title}</h1>
         <img src={reactLogo} className="h-[20vmin] pointer-events-none motion-safe:animate-logo-spin" alt="logo" />
         <img src={viteLogo} className="h-[20vmin] pointer-events-none motion-safe:animate-logo-spin" alt="logo" />
         <p className="m-4">Hello React + Vite!</p>
@@ -40,5 +47,7 @@ const App = () => {
     </div>
   )
 }
+
+
 
 export default App
