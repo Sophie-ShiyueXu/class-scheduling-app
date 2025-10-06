@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import Banner from './components/Banner'
 import CourseCardList from './components/CoursCardList'
 import { useJsonQuery } from "./utilities/fetch";
+import TermPage from './components/TermPage';
 
 
 const DATA_URL =
@@ -65,7 +66,8 @@ const App = () => {
       <header className="bg-dark text-white d-flex flex-column align-items-center justify-content-center min-vh-100">
         <div className="container py-4">
           <Banner title={schedule.title} />
-          <CourseCardList courses={schedule.courses} />
+          {/* <CourseCardList courses={schedule.courses} /> */}
+          <TermPage courses={schedule.courses} />
         </div>
         
       </header>
