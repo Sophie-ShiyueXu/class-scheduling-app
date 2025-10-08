@@ -10,6 +10,16 @@ interface TermPageProps {
 
 const TermPage = ({ courses }: TermPageProps) => {
   const [selectedTerm, setSelectedTerm] = useState<Term>('Fall');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredCourses = useMemo(
     () =>
@@ -22,7 +32,8 @@ const TermPage = ({ courses }: TermPageProps) => {
   return (
     <section>
       <TermSelector selected={selectedTerm} onSelect={setSelectedTerm} />
-      <CourseCardList courses={filteredCourses} />
+
+      <CourseCardList courses={filteredCourses} selectedIds={selectedIds} onToggle={toggleSelect}/>
     </section>
   );
 };
