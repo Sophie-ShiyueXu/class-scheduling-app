@@ -3,6 +3,7 @@ import TermSelector from './TermSelector';
 import type { Term } from './TermSelector';
 import CourseCardList from './CoursCardList';
 import type { Course } from '../App';
+import SchedulePopup from './SchedulePopup';
 
 interface TermPageProps {
   courses: Record<string, Course>;
@@ -29,11 +30,28 @@ const TermPage = ({ courses }: TermPageProps) => {
     [courses, selectedTerm]
   );
 
-  return (
-    <section>
-      <TermSelector selected={selectedTerm} onSelect={setSelectedTerm} />
+  const [planOpen, setPlanOpen] = useState(false); 
+  const selectedCourses: Course[] = useMemo(() => { 
+    const arr: Course[] = [];
+    selectedIds.forEach((id) => {
+      const c = courses[id];
+      if (c) arr.push(c);
+    });
+    return arr;
+  }, [selectedIds, courses]);
 
+
+  return (
+    <section className="p-4">
+      <div className="flex items-center justify-between mb-4">
+        <TermSelector selected={selectedTerm} onSelect={setSelectedTerm} />
+        <button type="button" className="btn btn-outline-secondary" onClick={() => setPlanOpen(true)} ria-label="Open course plan">
+            Course plan
+        </button>
+      </div>
       <CourseCardList courses={filteredCourses} selectedIds={selectedIds} onToggle={toggleSelect}/>
+
+      <SchedulePopup isOpen={planOpen} onClose={() => setPlanOpen(false)} courses={selectedCourses}/>
     </section>
   );
 };
