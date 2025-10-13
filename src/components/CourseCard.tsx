@@ -4,16 +4,24 @@ type Props = {
   course: Course;
   selected: boolean;
   onToggle: (id: string) => void;
+  blocked?: boolean;
 };
 
-function CourseCard({ id, course, selected, onToggle }: Props) {
+function CourseCard({ id, course, selected, onToggle, blocked = false }: Props) {
   const { term, number, title, meets } = course;
 
   const cardClass = [
     "card h-100 shadow-sm position-relative",
     selected ? "border-primary" : "border-200",
     selected ? "bg-light" : "bg-white",
-  ].join(" ");
+    blocked ? "opacity-50" : "",                
+    blocked ? "pe-none" : "", 
+  ].filter(Boolean).join(" ");
+
+  const handleToggle = () => {
+    if (blocked && !selected) return;
+    onToggle(id);
+  };
 
   return (
     <li className="list-unstyled col">
@@ -21,10 +29,11 @@ function CourseCard({ id, course, selected, onToggle }: Props) {
         role="button"
         tabIndex={0}
         aria-pressed={selected}
+        aria-disabled={blocked && !selected} 
         className={cardClass}
-        onClick={() => onToggle(id)}
+        onClick={handleToggle}                   
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") onToggle(id);
+          if (e.key === "Enter" || e.key === " ") handleToggle;
         }}
       >
         {selected && (
@@ -32,6 +41,15 @@ function CourseCard({ id, course, selected, onToggle }: Props) {
             className="position-absolute top-0 end-0 m-2 badge text-bg-primary"
             aria-hidden
           >
+          </span>
+        )}
+        {blocked && !selected && (              
+          <span
+            className="position-absolute top-0 end-0 m-2 badge text-bg-secondary"
+            title="Time conflict"
+            aria-label="Time conflict"
+          >
+            ×
           </span>
         )}
 
