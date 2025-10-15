@@ -6,6 +6,8 @@ import CourseCardList from './components/CoursCardList'
 import { useJsonQuery } from "./utilities/fetch";
 import TermPage from './components/TermPage';
 
+import { Routes, Route, Link } from 'react-router-dom'; 
+import CourseForm from './components/CourseForm';
 
 const DATA_URL =
   "https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php";
@@ -66,7 +68,18 @@ const App = () => {
       <header className="bg-dark text-white d-flex flex-column align-items-center justify-content-center min-vh-100">
         <div className="container py-4">
           <Banner title={schedule.title} />
-          {/* <CourseCardList courses={schedule.courses} /> */}
+          <nav className="mb-3">
+            <Link to="/" className="btn btn-sm btn-outline-light me-2">Home</Link>
+            <Link to="/courses/new" className="btn btn-sm btn-primary">Add Course</Link>
+          </nav>
+          <Routes>
+            <Route path="/" element={<TermPage courses={schedule.courses} />} />
+            <Route path="/courses/new" element={<CourseForm />} />
+            <Route
+              path="/courses/:id/edit"
+              element={<CourseForm courses={schedule.courses} />}
+            />
+          </Routes>
           <TermPage courses={schedule.courses} />
         </div>
         

@@ -2,6 +2,7 @@ import React from "react";
 import CourseCard from "./CourseCard";
 import type { Course } from "../App";
 import { conflictsWithAnySelected } from "../utils/timeconflict";
+import { Link } from "react-router-dom";
 
 type Props = {
   courses: Record<string, Course>;
@@ -22,14 +23,21 @@ function CourseCardList({ courses, selectedIds, onToggle }: Props) {
       const blocked = !isSelected && conflictsWithAnySelected(course, selectedCourses);
 
       return (
-        <CourseCard
-          key={id}
-          id={id}
-          course={course}
-          selected={isSelected}
-          onToggle={onToggle}
-          blocked={blocked}
-        />
+        <li key={id}>
+            <CourseCard
+              id={id}
+              course={course}
+              selected={isSelected}
+              onToggle={onToggle}
+              blocked={blocked}
+            />
+            <div className="mt-1">
+              <Link to={`/courses/${id}/edit`} className="btn btn-sm btn-outline-primary">
+                Edit
+              </Link>
+            </div>
+          </li>
+
       );
     })}
   </ul>

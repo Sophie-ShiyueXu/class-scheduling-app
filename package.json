@@ -13,9 +13,13 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "@tanstack/react-router": "^1.133.3",
+    "@tanstack/router-devtools": "^1.133.3",
+    "@tanstack/router-vite-plugin": "^1.133.3",
     "bootstrap": "^5.3.8",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.4",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
@@ -23,6 +27,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.0.2",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
