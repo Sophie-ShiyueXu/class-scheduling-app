@@ -1,66 +1,152 @@
-import { useState, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import type { Course } from "../App";
+import { useState } from 'react'
+
+export interface Course {
+    term: string
+    number: string
+    meets: string
+    title: string
+}
 
 interface CourseFormProps {
-  courses?: Record<string, Course>;
+    course: Course
+    onCancel: () => void
 }
 
-export default function CourseForm({ courses }: CourseFormProps) {
-  const navigate = useNavigate();
-  const { id } = useParams();
+export type CourseErrors = Partial<Record<keyof Course, string>>
 
-  const editingCourse = useMemo(
-    () => (id && courses ? courses[id] : undefined),
-    [id, courses]
-  );
+export function validateCourse(c: Course): { valid: boolean; errors: CourseErrors } {
+    const errors: CourseErrors = {}
 
-  const [title, setTitle] = useState(editingCourse?.title ?? "");
-  const [meets, setMeets] = useState(editingCourse?.meets ?? "");
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); 
-  };
+    if (!c.title || c.title.trim().length < 2) {
+        errors.title = 'Title must be at least 2 characters.'
+    }
 
-  return (
-    <form onSubmit={onSubmit} className="p-4">
-      <h2>{editingCourse ? "Edit Course" : "Add Course"}</h2>
 
-      <div className="mb-3">
-        <label htmlFor="title" className="form-label">
-          Course Title
-        </label>
-        <input
-          id="title"
-          type="text"
-          className="form-control"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Introduction to Programming"
-        />
-      </div>
+    const allowedTerms = ['Fall', 'Winter', 'Spring', 'Summer']
+    if (!allowedTerms.includes(c.term)) {
+        errors.term = 'Term must be Fall, Winter, Spring, or Summer.'
+    }
 
-      <div className="mb-3">
-        <label htmlFor="meeting" className="form-label">
-          Meeting Times
-        </label>
-        <input
-          id="meeting"
-          type="text"
-          className="form-control"
-          value={meets}
-          onChange={(e) => setMeets(e.target.value)}
-          placeholder="e.g. MWF 10:00–10:50"
-        />
-      </div>
+    if (!/^[0-9]+(?:-[0-9]+)?$/.test(c.number)) {
+        errors.number = 'Course number must be digits with optional section, e.g., "213-2".'
+    }
 
-      <button
-        type="button"
-        className="btn btn-secondary"
-        onClick={() => navigate("/")}
-      >
-        Cancel
-      </button>
-    </form>
-  );
+    if (c.meets && c.meets.trim() !== '') {
+        const parts = c.meets.trim().split(/\s+/)
+        const daysPart = parts[0]
+        const timePart = parts.slice(1).join(' ')
+
+        const timeRegex = /\d{1,2}:\d{2}-\d{1,2}:\d{2}/
+        const daysRegex = /^[A-Za-z]{1,4}$/ 
+
+        if (!daysPart || !daysRegex.test(daysPart) || !timePart || !timeRegex.test(timePart)) {
+            errors.meets = 'Must contain days and start-end, e.g., "MWF 12:00-13:20".'
+        }
+    }
+
+    return { valid: Object.keys(errors).length === 0, errors }
 }
+
+const CourseForm = ({ course, onCancel }: CourseFormProps) => {
+    const [title, setTitle] = useState(course.title)
+    const [meetingtime, setMeetingTime] = useState(course.meets)
+    const [term, setTerm] = useState(course.term)
+    const [number, setNumber] = useState(course.number)
+    const [errors, setErrors] = useState<CourseErrors>({})
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        const data: Course = { title, meets: meetingtime, term, number }
+        const result = validateCourse(data)
+        setErrors(result.errors)
+
+    }
+
+    const runLiveValidation = () => {
+        const data: Course = { title, meets: meetingtime, term, number }
+        const result = validateCourse(data)
+        setErrors(result.errors)
+    }
+
+    return (
+        <div className="max-w-lg mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-6">Edit Course Details</h2>
+            <form onSubmit={handleSubmit} noValidate>
+                <div className="mb-4">
+                    <label htmlFor="term" className="block text-lg font-bold mb-2">Term</label>
+                    <select
+                        id="term"
+                        name="term"
+                        value={term}
+                        onChange={(e) => { setTerm(e.target.value); runLiveValidation() }}
+                        className={`w-full rounded border p-2 ${errors.term ? 'border-red-500' : 'border-gray-300'}`}
+                        aria-invalid={!!errors.term}
+                    >
+                        <option value="Fall">Fall</option>
+                        <option value="Winter">Winter</option>
+                        <option value="Spring">Spring</option>
+                        <option value="Summer">Summer</option>
+                    </select>
+                    {errors.term && <div className="text-sm text-red-600 mt-1">{errors.term}</div>}
+                </div>
+
+                <div className="mb-4">
+                    <label htmlFor="number" className="block text-lg font-bold mb-2">Course Number</label>
+                    <input
+                        id="number"
+                        name="number"
+                        type="text"
+                        value={number}
+                        onChange={(e) => { setNumber(e.target.value); runLiveValidation() }}
+                        className={`w-full rounded border p-2 ${errors.number ? 'border-red-500' : 'border-gray-300'}`}
+                        aria-invalid={!!errors.number}
+                    />
+                    {errors.number && <div className="text-sm text-red-600 mt-1">{errors.number}</div>}
+                </div>
+
+                <div className="mb-4">
+                    <label htmlFor="title" className="block text-lg font-bold mb-2">Course Title</label>
+                    <input
+                        id="title"
+                        type="text"
+                        name="title"
+                        value={title}
+                        onChange={(evt) => { setTitle(evt.target.value); runLiveValidation() }}
+                        className={`w-full rounded border p-2 ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                        aria-invalid={!!errors.title}
+                    />
+                    {errors.title && <div className="text-sm text-red-600 mt-1">{errors.title}</div>}
+                </div>
+
+                <div className="mb-6">
+                    <label htmlFor="meetingtime" className="block text-lg font-bold mb-2">Meeting Times</label>
+                    <input
+                        id="meetingtime"
+                        type="text"
+                        name="meetingtime"
+                        value={meetingtime}
+                        onChange={(evt) => { setMeetingTime(evt.target.value); runLiveValidation() }}
+                        className={`w-full rounded border p-2 ${errors.meets ? 'border-red-500' : 'border-gray-300'}`}
+                        aria-invalid={!!errors.meets}
+                        placeholder={`e.g. MWF 12:00-13:20`}
+                    />
+                    {errors.meets && <div className="text-sm text-red-600 mt-1">{errors.meets}</div>}
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    )
+}
+
+export default CourseForm
