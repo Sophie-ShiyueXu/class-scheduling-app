@@ -17,6 +17,7 @@
     "@tanstack/router-devtools": "^1.133.3",
     "@tanstack/router-vite-plugin": "^1.133.3",
     "bootstrap": "^5.3.8",
+    "firebase": "^12.4.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",
