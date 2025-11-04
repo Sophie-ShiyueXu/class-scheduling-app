@@ -1,4 +1,6 @@
+import SafeLink from './SafeLink';
 import type { Course } from "../App";
+
 type Props = {
   id: string;
   course: Course;
@@ -21,6 +23,10 @@ function CourseCard({ id, course, selected, onToggle, blocked = false }: Props) 
   const handleToggle = () => {
     if (blocked && !selected) return;
     onToggle(id);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -58,6 +64,16 @@ function CourseCard({ id, course, selected, onToggle, blocked = false }: Props) 
           <p className="card-text text-body-secondary flex-grow-1">{title}</p>
           <div className="text-muted small mt-2">{meets || "TBA"}</div>
           <div className="text-muted small mt-1">
+          </div>
+          <div className="mt-2">
+            <SafeLink 
+              to="/course/edit/$courseId" 
+              params={{ courseId: id }}
+              className="btn btn-sm btn-outline-primary"
+              onClick={handleEditClick}
+            >
+              Edit
+            </SafeLink>
           </div>
         </div>
       </div>

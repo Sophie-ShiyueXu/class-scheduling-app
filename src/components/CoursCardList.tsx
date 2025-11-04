@@ -1,5 +1,5 @@
-import React from "react";
 import CourseCard from "./CourseCard";
+import ErrorBoundary from "./ErrorBoundary";
 import type { Course } from "../App";
 import { conflictsWithAnySelected } from "../utils/timeconflict";
 
@@ -22,14 +22,15 @@ function CourseCardList({ courses, selectedIds, onToggle }: Props) {
       const blocked = !isSelected && conflictsWithAnySelected(course, selectedCourses);
 
       return (
-        <CourseCard
-          key={id}
-          id={id}
-          course={course}
-          selected={isSelected}
-          onToggle={onToggle}
-          blocked={blocked}
-        />
+        <ErrorBoundary key={id}>
+          <CourseCard
+            id={id}
+            course={course}
+            selected={isSelected}
+            onToggle={onToggle}
+            blocked={blocked}
+          />
+        </ErrorBoundary>
       );
     })}
   </ul>
