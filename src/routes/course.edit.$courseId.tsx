@@ -34,8 +34,10 @@ function CourseEditPage() {
 
   return (
     <CourseForm 
-      course={course} 
+      course={course}
+      courseId={courseId}
       onCancel={() => navigate({ to: '/' })} 
+      onSave={() => navigate({ to: '/' })}
     />
   );
 }

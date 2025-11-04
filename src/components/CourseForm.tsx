@@ -2,17 +2,25 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseFormSchema, type CourseFormData } from '../schemas/courseValidation';
 import type { Course } from '../App';
+import { updateCourse } from '../utilities/firebase';
+import { useState } from 'react';
 
 type Props = {
   course: Course;
+  courseId: string;
   onCancel: () => void;
+  onSave?: () => void;
 };
 
-function CourseForm({ course, onCancel }: Props) {
+function CourseForm({ course, courseId, onCancel, onSave }: Props) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isDirty },
+    watch
   } = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -24,14 +32,46 @@ function CourseForm({ course, onCancel }: Props) {
     mode: 'onChange'
   });
 
-  // This function does nothing as specified in requirements
-  const onSubmit = (data: CourseFormData) => {
-    // Do nothing - as requested in the requirements
-    console.log('Form submitted with data:', data);
-    alert('Form is valid! Data logged to console.');
+  // Watch all form values to detect changes
+  const watchedValues = watch();
+
+  const onSubmit = async (data: CourseFormData) => {
+    // Check if there are any form errors
+    const hasErrors = Object.keys(errors).length > 0;
+    if (hasErrors) {
+      return;
+    }
+
+    // Check if there are any changes
+    if (!isDirty) {
+      alert('No changes to save.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      // Update course in Firebase
+      await updateCourse(courseId, data);
+      
+      // Show success message
+      alert('Course updated successfully!');
+      
+      // Call onSave callback if provided
+      if (onSave) {
+        onSave();
+      }
+    } catch (error) {
+      console.error('Error updating course:', error);
+      setSubmitError('Failed to update course. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const hasErrors = Object.keys(errors).length > 0;
+  const canSubmit = !hasErrors && isDirty && !isSubmitting;
 
   return (
     <div className="container mt-4">
@@ -128,20 +168,38 @@ function CourseForm({ course, onCancel }: Props) {
                 </div>
 
 
+                {submitError && (
+                  <div className="alert alert-danger mb-3">
+                    {submitError}
+                  </div>
+                )}
+
                 <div className="d-flex gap-2">
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={onCancel}
+                    disabled={isSubmitting}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`btn ${hasErrors ? 'btn-outline-primary' : 'btn-primary'}`}
-                    disabled={hasErrors}
+                    className={`btn ${canSubmit ? 'btn-primary' : 'btn-outline-primary'}`}
+                    disabled={!canSubmit}
                   >
-                    {hasErrors ? 'Submit' : 'Submit '}
+                    {isSubmitting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Saving...
+                      </>
+                    ) : hasErrors ? (
+                      'Fix Errors to Submit'
+                    ) : !isDirty ? (
+                      'No Changes'
+                    ) : (
+                      'Submit'
+                    )}
                   </button>
                 </div>
               </form>

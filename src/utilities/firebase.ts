@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { useCallback, useEffect, useState } from 'react';
-import { getDatabase, onValue, push, ref, update } from 'firebase/database';
+import { getDatabase, onValue, push, ref, update, set } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCCoTyn1RjaWhCD18hJ7pC39uDvzg6sYcw",
@@ -36,4 +36,16 @@ export const useDataQuery = (path: string): [unknown, boolean, Error | undefined
   }, [ path ]);
 
   return [ data, loading, error ];
+};
+
+
+export const updateCourse = async (courseId: string, courseData: any) => {
+  const courseRef = ref(database, `courses/${courseId}`);
+  return update(courseRef, courseData);
+};
+
+
+export const setCourse = async (courseId: string, courseData: any) => {
+  const courseRef = ref(database, `courses/${courseId}`);
+  return set(courseRef, courseData);
 };
