@@ -4,6 +4,7 @@ import TermPage from '../components/TermPage'
 import { useJsonQuery } from '../utilities/fetch'
 import { getDataUrl } from '../utilities/config'
 import type { Course } from '../App'
+import { useDataQuery } from '../utilities/firebase';
 
 const DATA_URL = getDataUrl();
 
@@ -17,7 +18,7 @@ export const Route = createFileRoute('/')({
 })
 
 function IndexPage() {
-  const [json, isLoading, error] = useJsonQuery(DATA_URL);
+  const [json, isLoading, error] = useDataQuery('/');
 
   if (error) return <h1>Error loading course data: {`${error}`}</h1>;
   if (isLoading) return <h1>Loading course data...</h1>;

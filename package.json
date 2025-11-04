@@ -17,6 +17,7 @@
     "@tanstack/react-router": "^1.134.12",
     "@tanstack/react-router-devtools": "^1.134.12",
     "bootstrap": "^5.3.8",
+    "firebase": "^12.5.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.66.0",
