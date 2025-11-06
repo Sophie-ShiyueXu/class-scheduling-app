@@ -1,12 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Banner from '../components/Banner'
 import TermPage from '../components/TermPage'
-import { useJsonQuery } from '../utilities/fetch'
-import { getDataUrl } from '../utilities/config'
 import type { Course } from '../App'
 import { useDataQuery } from '../utilities/firebase';
-
-const DATA_URL = getDataUrl();
 
 interface Schedule {
   title: string;
@@ -20,16 +15,49 @@ export const Route = createFileRoute('/')({
 function IndexPage() {
   const [json, isLoading, error] = useDataQuery('/');
 
-  if (error) return <h1>Error loading course data: {`${error}`}</h1>;
-  if (isLoading) return <h1>Loading course data...</h1>;
-  if (!json) return <h1>No course data found</h1>;
+  if (isLoading) return (
+    <div className="container py-4 text-center">
+      <div className="spinner-border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
+      <p className="mt-2">Loading course data...</p>
+    </div>
+  );
+
+  if (error) {
+    const errorMessage = error.toString();
+    const isPermissionError = errorMessage.includes('permission_denied') || 
+                             errorMessage.includes('Permission denied');
+    
+    return (
+      <div className="container py-4">
+        {isPermissionError ? (
+          <DatabaseInitializer />
+        ) : (
+          <div className="alert alert-danger">
+            <h4>❌ Error Loading Course Data</h4>
+            <p>Error: {errorMessage}</p>
+            <p className="mb-0">
+              <small>Please check your Firebase configuration and database rules.</small>
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (!json) return (
+    <div className="container py-4">
+      <DatabaseInitializer />
+    </div>
+  );
 
   const schedule = json as Schedule;
 
   return (
     <div className="text-center">
       <div className="container py-4">
-        <Banner title={schedule.title} />
+        <h2 className="mb-4">{schedule.title}</h2>
         <TermPage courses={schedule.courses} />
       </div>
     </div>

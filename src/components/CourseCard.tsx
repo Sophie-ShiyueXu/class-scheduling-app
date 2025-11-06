@@ -1,4 +1,5 @@
 import SafeLink from './SafeLink';
+import { useAuthState } from '../utilities/firebase';
 import type { Course } from "../App";
 
 type Props = {
@@ -66,14 +67,20 @@ function CourseCard({ id, course, selected, onToggle, blocked = false }: Props) 
           <div className="text-muted small mt-1">
           </div>
           <div className="mt-2">
-            <SafeLink 
-              to="/course/edit/$courseId" 
-              params={{ courseId: id }}
-              className="btn btn-sm btn-outline-primary"
-              onClick={handleEditClick}
-            >
-              Edit
-            </SafeLink>
+            {(() => {
+              const { user } = useAuthState();
+              if (!user) return null;
+              return (
+                <SafeLink
+                  to="/course/edit/$courseId"
+                  params={{ courseId: id }}
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={handleEditClick}
+                >
+                  Edit
+                </SafeLink>
+              );
+            })()}
           </div>
         </div>
       </div>

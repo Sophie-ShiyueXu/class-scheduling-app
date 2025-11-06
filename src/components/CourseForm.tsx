@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { courseFormSchema, type CourseFormData } from '../schemas/courseValidation';
 import type { Course } from '../App';
-import { updateCourse } from '../utilities/firebase';
+import { updateCourse, useAuthState } from '../utilities/firebase';
 import { useState } from 'react';
 
 type Props = {
@@ -15,12 +15,31 @@ type Props = {
 function CourseForm({ course, courseId, onCancel, onSave }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { user } = useAuthState();
+
+  // If user is not authenticated, show message
+  if (!user) {
+    return (
+      <div className="container mt-4">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="alert alert-warning text-center">
+              <h4>Authentication Required</h4>
+              <p>You must be signed in to edit courses.</p>
+              <button className="btn btn-secondary" onClick={onCancel}>
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
-    watch
+    formState: { errors, isDirty }
   } = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -32,11 +51,9 @@ function CourseForm({ course, courseId, onCancel, onSave }: Props) {
     mode: 'onChange'
   });
 
-  // Watch all form values to detect changes
-  const watchedValues = watch();
+
 
   const onSubmit = async (data: CourseFormData) => {
-    // Check if there are any form errors
     const hasErrors = Object.keys(errors).length > 0;
     if (hasErrors) {
       return;
@@ -55,10 +72,8 @@ function CourseForm({ course, courseId, onCancel, onSave }: Props) {
       // Update course in Firebase
       await updateCourse(courseId, data);
       
-      // Show success message
       alert('Course updated successfully!');
       
-      // Call onSave callback if provided
       if (onSave) {
         onSave();
       }
